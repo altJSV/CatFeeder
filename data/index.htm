@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ru">
+ <head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+  <link rel="stylesheet" href="/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="/style.css">
+  <script type="text/javascript" src="/function.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Настройки</title>
+  <script type="text/javascript">
+   var set_real_time;
+   function handleServerResponse(){
+    clearTimeout(set_real_time);
+    var res = jsonResponse.time.split(":");
+    real_time(hours=res[0],min=res[1],sec=res[2]);
+    document.body.style.backgroundColor="rgb("+jsonResponse.rgb+")";
+   }
+   function real_time(hours,min,sec) {
+   sec=Number(sec)+1;
+    if (sec>=60){min=Number(min)+1;sec=0;}
+    if (min>=60){hours=Number(hours)+1;min=0;}
+    if (hours>=24){hours=0};
+    document.getElementById("time").innerHTML = hours+":"+min+":"+sec;
+    set_real_time = setTimeout("real_time("+hours+","+min+","+sec+");", 1000);
+   }
+   function load_time(submit){
+    server = "/Time";
+    send_request(submit,server);
+    load();
+   }
+   
+   function feed_cat(submit){
+    server = "/feed";
+    send_request(submit,server);
+    }
+	
+   function time_zone(submit){
+    server = "/TimeZone?timezone="+val('timezone');
+    send_request(submit,server);
+   }
+   function set_time_zone(submit){
+    var set_date = new Date();
+    var gmtHours = -set_date.getTimezoneOffset()/60;
+    document.getElementById('timezone').value = gmtHours;
+    server = "/TimeZone?timezone="+gmtHours;
+    send_request(submit,server);
+   }
+   function set_alarm(submit){
+   if (document.getElementById('ac0').checked) {document.getElementById('ac0').value='1';} else {document.getElementById('ac0').value='0';}
+   if (document.getElementById('ac1').checked) {document.getElementById('ac1').value='1';} else {document.getElementById('ac1').value='0';}
+   if (document.getElementById('ac2').checked) {document.getElementById('ac2').value='1';} else {document.getElementById('ac2').value='0';}
+   if (document.getElementById('ac3').checked) {document.getElementById('ac3').value='1';} else {document.getElementById('ac3').value='0';}
+    server = "/Alarms?alt0="+val('alt0')+"&ac0="+val('ac0')+"&alt1="+val('alt1')+"&ac1="+val('ac1')+"&alt2="+val('alt2')+"&ac2="+val('ac2')+"&alt3="+val('alt3')+"&ac3="+val('ac3')
+    send_request(submit,server);
+   }
+   
+   function set_ssid(submit){
+    server = "/ssid?ssid="+val('ssid')+"&password="+encodeURIComponent(val('password'));
+    send_request(submit,server);
+    alert("Измененя вступят в силу после перезагрузки. Пожалуйта перезагрузите устройство.");
+   }
+   function set_ssid_ap(submit){
+    server = "/ssidap?ssidAP="+val('ssidap')+"&passwordAP="+encodeURIComponent(val('passwordAp'));
+    send_request(submit,server);
+    alert("Измененя вступят в силу после перезагрузки. Пожалуйта перезагрузите устройство.");
+   }
+   function set_ssdp(submit){
+    server = "/ssdp?ssdp="+val('ssdp');
+    send_request(submit,server);
+    document.getElementById('ssdp_t').innerHTML = val('ssdp');
+   }
+   function set_feedAmount(submit){
+    server = "/FeedAmount?feedAmount="+val('feedAmount');
+    send_request(submit,server);
+    }
+   function restart(submit,texts){
+    if (confirm(texts)) {
+	 server = "/restart?device=ok";
+     send_request(submit,server);
+     return true;
+    } else {
+     return false;
+    }
+   }
+         
+  </script>
+ </head>
+ <body onload="load();">
+  <div class="container">
+   <div class="row" style="text-align:center;">
+    <h1 style="margin:50px;">Настройки</h1>
+    <div class="col-sm-offset-2 col-sm-8 col-md-offset-3 col-md-6">
+     <h5 class="alert-info" id="ssdp_t">{{SSDP}}</h5>
+     <hr>
+      <div class="alert alert-dismissible alert-info">
+      <b>Обновление: <a href="/edit" target="_blank">Открыть редактор HTML</a> или <a href="/update" target="_blank">загрузить прошивку (bin)</a></b>
+      </div>
+	 <img src="cat.png" align=center>
+	 <input class="btn btn-block btn-primary" value="Покормить кота" onclick="feed_cat();" type="submit">
+	 <hr>
+	 <h2>Размер порции</h2>
+     <input id="feedAmount" value="{{feedAmount}}" class="form-control" pattern="[0-9]{1,3}" placeholder="40">
+     <input class="btn btn-block btn-success" value="Сохранить" onclick="set_feedAmount(this);" type="submit">
+     <hr>
+	 <h2>Время кормления</h2>
+	 <div class="alert alert-dismissible alert-info">
+	  <div class="btn-group">
+	  <input id="alt0" value="{{alt0}}" class="form-control" type="time"><br>
+		<label class="switch">
+		<input id="ac0"  class="form-control" type="checkbox" {{ac0}} value="0">
+		<span class="slider round"></span>
+		</label>
+	  </div>
+	  <div class="btn-group">
+	  <input id="alt1" value="{{alt1}}" class="form-control" type="time" ><br>
+	  <label class="switch">
+	  <input id="ac1"  class="form-control" type="checkbox" {{ac1}}  value="0">
+	  <span class="slider round"></span>
+		</label>
+	  </div>
+	  <div class="btn-group">
+	  <input id="alt2" value="{{alt2}}" class="form-control" type="time"><br>
+	  <label class="switch">
+	  <input id="ac2"  class="form-control" type="checkbox" {{ac2}} value="0">
+	  <span class="slider round"></span>
+		</label>
+	  </div>
+	  <div class="btn-group">
+	  <input id="alt3" value="{{alt3}}" class="form-control" type="time"><br>
+	  <label class="switch">
+	  <input id="ac3" class="form-control" type="checkbox" {{ac3}} value="0">
+	  <span class="slider round"></span>
+		</label>
+	  </div>
+	  <br><br>
+	 <input class="btn btn-block btn-success" value="Сохранить" onclick="set_alarm(this);" type="submit">
+    </div>
+     <h2>Имя устройства</h2>
+     <input id="ssdp" value="{{SSDP}}" class="form-control" pattern="[0-9a-zA-Zа-яА-Я. ]{1,20}" placeholder="Имя устройства">
+     <input class="btn btn-block btn-success" value="Сохранить" onclick="set_ssdp(this);" type="submit">
+     <hr>
+     <h2>Подключение к WiFi роутеру</h2>
+     <input id="ssid" value="{{ssid}}" class="form-control" pattern="{1,15}" placeholder="Имя WiFi сети">
+     <input id="password" value="{{password}}" pattern=".{8,15}" onfocus="this.type='text'" type="password" class="form-control" placeholder="Пароль">
+     <input class="btn btn-block btn-success" value="Сохранить" onclick="set_ssid(this);" type="submit">
+     <hr>
+     <h2>Временная зона GMT</h2>
+     <input id="timezone" value="{{timezone}}" pattern="[0-9]{1,3}" class="form-control">
+     <input class="btn btn-block btn-success" value="Сохранить" onclick="time_zone(this);" type="submit">
+     <input class="btn btn-block btn-primary" value="Авто определение и сохранение зоны" onclick="set_time_zone(this);" type="submit">
+     <h2>На устройстве сейчас <strong id="time">{{time}}</strong></h2>
+     <input class="btn btn-block btn-primary" value="Синхронизировать время" onclick="load_time(this);" type="submit">
+     <hr>
+     <h2>Точка доступа</h2>
+     <div class="row">
+      <div class="col-sm-6">
+       <input id="ssidap" value="{{ssidAP}}" class="form-control" pattern="[0-9a-zA-Z.]{1,15}" placeholder="Имя WiFi сети">
+       <input id="passwordAp" value="{{passwordAP}}" pattern=".{8,15}" onfocus="this.type='text'" type="password" class="form-control" placeholder="Пароль">
+       <input class="btn btn-block btn-success" value="Сохранить" onclick="set_ssid_ap(this);" type="submit">
+      </div>
+      <div class="col-sm-6">
+       <div class="alert alert-dismissible alert-warning">Здесь вы можете указать новое название WiFi точки доступа и пароль.</div>
+      </div>
+     </div>
+     <hr>
+     <input class="btn btn-block btn-warning" value="Перезагрузить устройство" onclick="restart(this,'Вы действительно хотите перезагрузить устройство?');" type="submit">
+    </div>
+   </div>
+  </div>
+ </body>
+</html>
