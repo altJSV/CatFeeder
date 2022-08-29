@@ -22,7 +22,7 @@
 Настройки arduino ide для NodeMCU
 ![](/settings.png)
 
-Файловую систему заливать вот по этому гайду https://randomnerdtutorials.com/install-esp8266-filesystem-uploader-arduino-ide/ , предварительно внеся в data/config.json настройки WiFi и прочего. Либо же задав их в скетче. Тогда config.json будет создан автоматически
+Файловую систему заливать вот по этому гайду https://randomnerdtutorials.com/install-esp8266-filesystem-uploader-arduino-ide/ , предварительно внеся в feeder.ino настройки WiFi и прочего. При последующих запусках настройки будут применены автоматически
 
 # Схема подключения
 ![](/scheme.png)
