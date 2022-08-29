@@ -94,6 +94,7 @@ void server_init(void) {
   server.on("/FeedAmount", handle_feed_amount);    // Установка времянной зоны по запросу вида http://192.168.0.101/TimeZone?timezone=3
   server.on("/Alarms",handle_alarms);
   server.on("/feed",handle_feed);
+  server.on("/time_scr",handle_time_scr);
   server.begin();
   Serial.println("HTTP server started");  
 }
@@ -103,6 +104,18 @@ void server_init(void) {
 // Установка SSDP имени по запросу вида http://192.168.0.101/ssdp?ssdp=proba
 void handle_Set_Ssdp() {
   SSDP_Name = server.arg("ssdp"); // Получаем значение ssdp из запроса сохраняем в глобальной переменной
+  saveConfig();                 // Функция сохранения данных во Flash пока пустая
+  server.send(200, "text/plain", "OK"); // отправляем ответ о выполнении
+}
+
+void handle_time_scr() {
+  int temp_time_scr;
+  temp_time_scr = server.arg("time_scr").toInt(); // Получаем значение time_scr из запроса сохраняем в глобальной переменной
+  scr_off_ms=temp_time_scr*1000;
+  if (temp_time_scr>0){
+  reduceBright.setInterval(scr_off_ms);  
+  }
+  else reduceBright.stop();
   saveConfig();                 // Функция сохранения данных во Flash пока пустая
   server.send(200, "text/plain", "OK"); // отправляем ответ о выполнении
 }
@@ -173,6 +186,7 @@ void handle_Restart() {
 
 void handle_ConfigJSON() {
   String output;
+  int temp_time_scr;
   String root = "{}";  // Формировать строку для отправки в браузер json формат
   //{"SSDP":"SSDP-test","ssid":"home","password":"i12345678","ssidAP":"WiFi","passwordAP":"","ip":"192.168.0.101"}
   // Резервируем память для json обекта буфер может рости по мере необходимти, предпочтительно для ESP8266
@@ -200,6 +214,8 @@ void handle_ConfigJSON() {
   if (feedTime[j][2]==1) output="checked"; else (output=" ");
   json["ac"+String(j)] = output;
 }
+  temp_time_scr=scr_off_ms/1000;
+  json["time_scr"]=temp_time_scr;
   //json["date"] = rtc.gettime("H:i:s");
   // Помещаем созданный json в переменную root
   root = "";

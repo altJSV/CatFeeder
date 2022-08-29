@@ -1,5 +1,6 @@
 // Загрузка данных сохраненных в файл  config.json
 bool loadConfig() {
+  int temp_time_scr;
   // Открываем файл для чтения
   File configFile = SPIFFS.open("/config.json", "r");
   if (!configFile) {
@@ -34,6 +35,8 @@ bool loadConfig() {
     ssid = root["ssidName"].as<String>();
     password = root["ssidPassword"].as<String>();
     feedAmount = root["feedAmount"];
+    temp_time_scr = root["time_scr"];
+    scr_off_ms=temp_time_scr*1000;
     for (byte j=0; j<4; j++){
     feedTime[j][0]=root["ah"+String(j)];
      feedTime[j][1]=root["am"+String(j)];
@@ -44,7 +47,7 @@ bool loadConfig() {
 
 // Запись данных в файл config.json
 bool saveConfig() {
-  
+  int temp_time_scr;
   // Резервируем памяь для json обекта буфер может рости по мере необходимти предпочтительно для ESP8266 
   DynamicJsonBuffer jsonBuffer;
   //  вызовите парсер JSON через экземпляр jsonBuffer
@@ -57,6 +60,8 @@ bool saveConfig() {
   json["ssidPassword"] = password;
   json["timezone"] = timezone;
   json["feedAmount"] = feedAmount;
+  temp_time_scr=scr_off_ms/1000;
+  json["time_scr"] = temp_time_scr;
   for (byte j=0; j<4; j++){
   json["ah" + String(j)] =  feedTime[j][0];
   json["am" + String(j)] =  feedTime[j][1];

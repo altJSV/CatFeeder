@@ -308,9 +308,19 @@ void runMotor(byte thisStep) {
   delayMicroseconds(FEED_SPEED);
 }
 
+
 void buttons_check(){
   btn.tick();
    btn2.tick();
+if (low_bright==true){
+if (btn.click() or btn2.click()){
+    if (scr_off_ms > 0) reduceBright.start();
+    if (low_bright==true){
+      low_bright=false;
+      display.dim(low_bright);
+    }
+   }   
+}
  switch (WorkMode) {
   
  
@@ -320,6 +330,7 @@ void buttons_check(){
 
           if (btn2.click()) {
                 WorkMode=1;
+                display.dim(false);
                 draw_display();
                             }       
                 
