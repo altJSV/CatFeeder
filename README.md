@@ -19,7 +19,8 @@
 
 # Компиляция и прошивка
 Все использованные библиотеки находятся в папке libraries в архиве проекта. 
-Настройки arduino ide для NodeMCU смотрите в файле Settings.png
+Настройки arduino ide для NodeMCU
+![](/settings.png)
 Файловую систему заливать вот по этому гайду https://randomnerdtutorials.com/install-esp8266-filesystem-uploader-arduino-ide/ , предварительно внеся в data/config.json настройки WiFi и прочего. Либо же задав их в скетче. Тогда config.json будет создан автоматически
 
 # Схема подключения
