@@ -1,7 +1,7 @@
 /*
   Скетч к проекту "Автокормушка Wi-Fi"
   - Создан на основе оригинального скетча AlexGyver
-  - Исходники этого проекта https://github.com/altJSV/CatFeeder/
+  - Исходники этого проекта https://github.com/sohm777/feeder/
   - Страница проекта AlexGyver (схемы, описания): https://alexgyver.ru/gyverfeed2/
   - Исходники скетча AlexGyver: https://github.com/AlexGyver/GyverFeed2/
 */
@@ -54,10 +54,10 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET); //ин
 
 
 //MQTT настройки
-const char* mqtt_server = "ip.ad.re.ss"; //ip или http адрес
+const char* mqtt_server = "192.168.1.1"; //ip или http адрес
 int mqtt_port = 1883; //порт
-const char* mqtt_login="login"; //логин
-const char* mqtt_pass="pass"; //пароль
+const char* mqtt_login="redmond"; //логин
+const char* mqtt_pass="12345678"; //пароль
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -72,8 +72,8 @@ int timezone = 3;
 
 //WiFi настройки
 IPAddress apIP(192, 168, 4, 1); //IP точки доступа ESP8266
-String ssid = "ssid"; //Название WIFI на роутере
-String password = "pass";//Пароль WIFI роутера
+String ssid = "Keenetic-8995"; //Название WIFI на роутере
+String password = "S1e9r8g5ey";//Пароль WIFI роутера
 String ssidAP="CatFeeder"; //Название точки доступа ESP8266
 String passwordAP="12345678";//Пароль точки доступа ESP8266
 String SSDP_Name = "CatFeeder"; // Имя SSDP. Под этим именем кормушка будет отображаться в сетевом окружении Windows
@@ -89,12 +89,16 @@ GTimer refscr(MS); //период обновления экрана
 GTimer wificheck(MS); //проверка подключения к wifi;
 GTimer rtcsync(MS); //синхронизация  RTC c NTP;
 GTimer feedCheck(MS);//таймер кормления
+GTimer reduceBright(MS);// снижение яркости дисплея при простое
 
 //Объявление кнопок
 EncButton2<EB_BTN> btn(INPUT,0); // D3 кнопка В1
 EncButton2<EB_BTN> btn2(INPUT,2); //D4 кнопка В2
 byte feedAmount = 25; //Размер порции. Нужен для первичной настройки. Далее будет читаться из конфига
 
+//Прочие настройки
+bool low_bright=false;
+long scr_off_ms=60000;
 void setup() {
   Serial.begin(115200);//Открытия COM порта для отладки
   
@@ -135,6 +139,7 @@ refscr.setInterval(1000); //Интервал обновления экрана �
 wificheck.setInterval(60000);// Интервал между проверками соединения с wifi 1 минута
 rtcsync.setInterval(3600000); //синхронизация  RTC c NTP каждый час
 feedCheck.setInterval(31000); //проверка таймеров кормления 1 раз в 31 секунду
+if (scr_off_ms>0) reduceBright.setInterval(scr_off_ms); //снижение яркости при простое;
 for (byte i = 0; i < 4; i++) pinMode(drvPins[i], OUTPUT);   // инициализация пинов драйвера шаговика
 delay(5000);
 
@@ -168,7 +173,14 @@ void loop() {
         if (feedTime[i][0] == rtc.Hours && feedTime[i][1] == rtc.minutes)    // время кормления
           feed();
     }
-  
+  if (scr_off_ms>0){
+  if (reduceBright.isReady()){ //снижение яркости при простое
+    if (low_bright==false){
+      low_bright=true;
+      display.dim(low_bright);
+    }
+    }
+}
   client.loop(); //MQQT читает топики
   
 
