@@ -3,6 +3,7 @@
 Создана на основе оригинального проекта AlexGyver
 Страница проекта AlexGyver (схемы, описания): https://alexgyver.ru/gyverfeed2/
 Исходники скетча AlexGyver: https://github.com/AlexGyver/GyverFeed2/
+Идея переноса на esp8266 Sohm777 https://github.com/sohm777/feeder/
 
 # Особенности
 - Oled дисплей 
