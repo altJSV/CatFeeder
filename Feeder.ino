@@ -1,7 +1,7 @@
 /*
   Скетч к проекту "Автокормушка Wi-Fi"
   - Создан на основе оригинального скетча AlexGyver
-  - Исходники этого проекта https://github.com/sohm777/feeder/
+  - Исходники этого проекта https://github.com/altJSV/CatFeeder/
   - Страница проекта AlexGyver (схемы, описания): https://alexgyver.ru/gyverfeed2/
   - Исходники скетча AlexGyver: https://github.com/AlexGyver/GyverFeed2/
 */
@@ -54,10 +54,10 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET); //ин
 
 
 //MQTT настройки
-const char* mqtt_server = "192.168.1.1"; //ip или http адрес
+const char* mqtt_server = "ip.ad.re.ss"; //ip или http адрес
 int mqtt_port = 1883; //порт
-const char* mqtt_login="redmond"; //логин
-const char* mqtt_pass="12345678"; //пароль
+const char* mqtt_login="login"; //логин
+const char* mqtt_pass="pass"; //пароль
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -72,11 +72,12 @@ int timezone = 3;
 
 //WiFi настройки
 IPAddress apIP(192, 168, 4, 1); //IP точки доступа ESP8266
-String ssid = "Keenetic-8995"; //Название WIFI на роутере
-String password = "S1e9r8g5ey";//Пароль WIFI роутера
+String ssid = "ssid"; //Название WIFI на роутере
+String password = "pass";//Пароль WIFI роутера
 String ssidAP="CatFeeder"; //Название точки доступа ESP8266
 String passwordAP="12345678";//Пароль точки доступа ESP8266
 String SSDP_Name = "CatFeeder"; // Имя SSDP. Под этим именем кормушка будет отображаться в сетевом окружении Windows
+String last_feed="Котика никто не кормил"; //время последнего кормления
 
 //Настройки меню
 byte WorkMode = 0; //0 - рабочий режим 1-меню настроек
@@ -99,6 +100,7 @@ byte feedAmount = 25; //Размер порции. Нужен для перви�
 //Прочие настройки
 bool low_bright=false;
 long scr_off_ms=60000;
+
 void setup() {
   Serial.begin(115200);//Открытия COM порта для отладки
   
@@ -173,6 +175,8 @@ void loop() {
         if (feedTime[i][0] == rtc.Hours && feedTime[i][1] == rtc.minutes)    // время кормления
           feed();
     }
+
+
   if (scr_off_ms>0){
   if (reduceBright.isReady()){ //снижение яркости при простое
     if (low_bright==false){

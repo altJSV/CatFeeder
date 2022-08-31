@@ -95,6 +95,7 @@ void server_init(void) {
   server.on("/Alarms",handle_alarms);
   server.on("/feed",handle_feed);
   server.on("/time_scr",handle_time_scr);
+  server.on("/status",handle_status_page);
   server.begin();
   Serial.println("HTTP server started");  
 }
@@ -131,6 +132,113 @@ void handle_Set_Ssid() {
 void handle_feed() {
   feed();
   server.send(200, "text/plain", "OK");   // отправляем ответ о выполнении
+}
+
+void handle_status_page (){
+  String webpage;
+  String tempTime;
+  uint32_t sec = millis() / 1000ul;      // полное количество секунд
+  int timeHours = (sec / 3600ul);        // часы
+  int timeDays = timeHours/24u; //дни
+  if (timeHours>23) timeHours= timeHours % 24u;
+  int timeMins = (sec % 3600ul) / 60ul;  // минуты
+  int timeSecs = (sec % 3600ul) % 60ul;  // секунды
+  webpage="<html lang='ru'>";
+  webpage+="<head>";
+  webpage+="<meta http-equiv='Content-type' content='text/html; charset=utf-8'>";
+  webpage+="<link rel='stylesheet' href='/bootstrap.min.css'>";
+  webpage+="<link rel='stylesheet' type='text/css' href='/style.css'>";
+  webpage+="<script type='text/javascript' src='/function.js'></script>";
+  webpage+="<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
+  webpage+="<title>Информация</title>";
+  webpage+="</head>";
+  webpage+="<body>";
+  webpage+="<div class='container'>";
+  webpage+="<div class='row' style='text-align:center;'>";
+  webpage+="<h1 style='margin:50px;'>Информация</h1>";
+  webpage+="<div class='col-sm-offset-2 col-sm-8 col-md-offset-3 col-md-6'>";
+  webpage+="<h2>Информация о сети:</h2>";
+  webpage+="<div class='alert alert-dismissible alert-info'>";
+  if (WiFi.getMode()!=WIFI_AP and WiFi.status() == WL_CONNECTED) {
+  webpage+="<b>WiFi mode:</b> WIFI_STA<br>";
+  webpage+="<b>SSID: </b>"+WiFi.SSID()+"<br>";
+  webpage+="<b>IP: </b>"+WiFi.localIP().toString()+"<br>";
+  webpage+="<b>Маска подсети: </b>"+WiFi.subnetMask().toString()+"<br>";
+  webpage+="<b>Шлюз: </b>"+WiFi.gatewayIP().toString()+"<br>";
+  webpage+="<b>RSSI: </b>"+String(WiFi.RSSI())+" dBm<br>";
+  } else {
+  webpage+="<b>WiFi mode: WIFI_AP</b><br>";
+  webpage+="<b>Название точки доступа: </b> "+ssidAP+"<br>";
+  webpage+="<b>IP: </b>"+apIP.toString()+"<br>";
+  }
+  webpage+="</div>";
+  webpage+="<h2>Время:</h2>";
+  webpage+="<div class='alert alert-dismissible alert-warning'>";
+  tempTime=String(timeDays)+"дн. ";
+  if (timeHours<10) tempTime+="0";
+  tempTime+=String(timeHours)+"ч. ";
+  if (timeMins<10) tempTime+="0";
+  tempTime+=String(timeMins)+"мин. ";
+  if (timeSecs<10) tempTime+="0";
+  tempTime+=String(timeSecs)+"сек";
+  webpage+="<b>Время работы: </b>"+tempTime+"<br>";
+  webpage+="<b>Время последнего кормления: </b>";
+  webpage+=last_feed+"<br><hr>";
+  webpage+="<b>Время NTP:</b> "+timeClient.getFormattedTime()+"<br>";
+  tempTime=rtc.gettime("H:i:s");
+  webpage+="<b>Время RTC:</b> "+tempTime+"<br>";
+  webpage+="</div>";
+  webpage+="<h2>Информация о микроконтроллере:</h2>";
+  webpage+="<div class='alert alert-dismissible alert-info'>";
+  webpage+="<b>Chip ID:</b> "+String(ESP.getChipId())+"<br>"; 
+  webpage+="<b>SDK Version:</b> "+String(ESP.getSdkVersion())+"<br>"; 
+  webpage+="<b>Boot Version:</b> "+String(ESP.getBootVersion())+"<br>"; 
+  webpage+="<b>Flash Chip Size:</b> "+String(ESP.getFlashChipSize())+"<br>"; 
+  webpage+="<b>Flash Chip Real Size:</b> "+String(ESP.getFlashChipRealSize())+"<br>"; 
+  webpage+="<b>Flash Chip Size by Chip ID:</b> "+String(ESP.getFlashChipSizeByChipId())+"<br>"; 
+  webpage+="<b>Flash Chip ID:</b> "+String(ESP.getFlashChipId())+"<br>";
+  webpage+="<b>Free Heap:</b> "+String(ESP.getFreeHeap())+"<br>"; 
+  webpage+="</div>";
+  webpage+="<h2>MQTT информация:</h2>";
+  webpage+="<div class='alert alert-dismissible alert-info'>";
+  webpage+="<b>Подключение :</b> ";
+  if (client.connected()) {
+    webpage+="<b>Связь с MQTT брокером установлена</b><br>";
+    webpage+="<b>Сервер :</b> "+String(mqtt_server)+"<br>";
+    webpage+="<b>Порт :</b> "+String(mqtt_port)+"<br>";
+  }
+  else webpage+="<b>Связь с MQTT брокером не установлена</b><br>";
+  webpage+="<b>Состояние:</b> ";
+  switch (client.state()){
+    case -4: webpage+="MQTT_CONNECTION_TIMEOUT<br>";
+            break;
+    case -3: webpage+="MQTT_CONNECTION_LOST<br>";
+            break;
+    case -2: webpage+="MQTT_CONNECT_FAILED<br>";
+            break;
+    case -1: webpage+="MQTT_DISCONNECTED<br>";
+            break;
+    case 0: webpage+="MQTT_CONNECTED<br>";
+            break;
+    case 1: webpage+="MQTT_CONNECT_BAD_PROTOCOL<br>";
+            break;
+    case 2: webpage+="MQTT_CONNECT_BAD_CLIENT_ID<br>";
+            break;
+    case 3: webpage+="MQTT_CONNECT_UNAVAILABLE<br>";
+            break;
+    case 4: webpage+="MQTT_CONNECT_BAD_CREDENTIALS<br>";
+            break;
+    case 5: webpage+="MQTT_CONNECT_UNAUTHORIZED<br>";
+            break;        
+  }
+  webpage+="</div>";
+  webpage+="<a class='btn btn-block btn-default' href='/index.htm'>Вернуться в настройки</a>";
+  webpage+="</div>";
+   webpage+="</div>";
+  webpage+="</div>";
+ webpage+="</body>";
+webpage+="</html>";
+server.send(200, "text/html", webpage);
 }
 
 //Установка параметров внутренней точки доступа по запросу вида http://192.168.0.101/ssidap?ssidAP=home1&passwordAP=8765439 
@@ -230,16 +338,33 @@ void MQTTcallback(char* topic, byte* payload, unsigned int length)
   Serial.println(topic);
   Serial.print("Message:");
   String message;
+  String command;
+  int param,param2;
   for (int i = 0; i < length; i++) 
   {
     message = message + (char)payload[i];
   }
   Serial.print(message);
-  if (message == "feed") 
-  {
-    feed();
-    client.publish("CatFeeder/feed","stop");
-  }
+  command=message.substring(0,4);
+  
+ 
+ if (command=="feed"){ feed();
+                  client.publish("CatFeeder/feed","CMD OK");
+ }
+ if (command=="feam"){  param=message.substring(4).toInt();
+                  feedAmount=param;
+                  client.publish("CatFeeder/feed","CMD OK");
+ }
+                  
+ if (command=="alsw"){  param=message.substring(5,6).toInt();
+                  param2=message.substring(7).toInt();
+                  if (param>=0 and param<4 and param2>=0 and param2<2) feedTime[param][2]=param2;
+                  client.publish("CatFeeder/feed","CMD OK");
+                  }    
+ 
+    
+
+
    Serial.println();
   Serial.println("-----------------------");
  

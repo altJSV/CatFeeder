@@ -288,6 +288,8 @@ void feed() {
   
   disableMotor();
   draw_display();
+  last_feed=rtc.gettime("H:i:s");
+ saveConfig();
 }
 
 void disableMotor() {

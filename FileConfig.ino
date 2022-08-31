@@ -37,6 +37,7 @@ bool loadConfig() {
     feedAmount = root["feedAmount"];
     temp_time_scr = root["time_scr"];
     scr_off_ms=temp_time_scr*1000;
+    last_feed = root["LastFeed"].as<String>();
     for (byte j=0; j<4; j++){
     feedTime[j][0]=root["ah"+String(j)];
      feedTime[j][1]=root["am"+String(j)];
@@ -62,6 +63,7 @@ bool saveConfig() {
   json["feedAmount"] = feedAmount;
   temp_time_scr=scr_off_ms/1000;
   json["time_scr"] = temp_time_scr;
+  json["lastFeed"] = last_feed;
   for (byte j=0; j<4; j++){
   json["ah" + String(j)] =  feedTime[j][0];
   json["am" + String(j)] =  feedTime[j][1];
