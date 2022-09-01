@@ -241,11 +241,24 @@ case 2:   display.setTextSize(1);
           display.println(WiFi.getMode());
           if (menuitem==3) display.setTextColor(BLACK, WHITE); else display.setTextColor(WHITE, BLACK);
           //display.println("Option3");
+          if (WiFi.getMode() == WIFI_AP) {
+            display.print("APSSID:");
+            display.println(ssidAP);
+            display.print("AP pass:");
+            display.println(passwordAP);
+          }
           display.setCursor(0,55); 
           display.println("B1-set, B2-move");
           break;
+case 3:   display.setTextSize(1);
+          display.setCursor(0, 0);
+          display.println("Delete config");
+          display.drawFastHLine(0,10,128,WHITE);
+          display.setCursor(0, 14);
+          display.println("Hold B1 to delete config.json, Hold B2 to return in main menu");        
           }
           if (WiFi.status() != WL_CONNECTED) display.drawBitmap(119,0,image_data_no_wifi,9,9,1); else display.drawBitmap(119,0,image_data_wifi_icon,9,9,1);
           if (!client.connected()) display.drawBitmap(108,0,image_data_no_wifi,9,9,1); else display.drawBitmap(108,0,image_data_mqtt,9,9,1);
    display.display();
+   
 }

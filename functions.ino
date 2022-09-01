@@ -289,7 +289,7 @@ void feed() {
   disableMotor();
   draw_display();
   last_feed=rtc.gettime("H:i:s");
- saveConfig();
+// saveConfig();
 }
 
 void disableMotor() {
@@ -336,12 +336,17 @@ if (btn.click() or btn2.click()){
                 draw_display();
                             }       
                 
-           if (btn2.held()){
+           if (btn2.held(0)){
             WorkMode=2;
             draw_display();
             menuitem=0;
            }
-           
+
+           if (btn2.held(5)){
+            WorkMode=3;
+            draw_display();
+            menuitem=0;
+           }
                 break;
 case 1:         if (alarm_edit==false){
                                 if (btn2.click()){
@@ -426,7 +431,7 @@ case 2:         if (btn.click()) {
                 draw_display();
                 }  
                 
-                if (btn2.held()){
+                if (btn2.held(0)){
                 saveConfig();
                 WorkMode=0;
                 SetTime();
@@ -434,7 +439,18 @@ case 2:         if (btn.click()) {
                 
                }
                 break;
+ case 3: if (btn.held())
+         {
+          //SPIFFS.remove("/congig.json");
+          ESP.reset();
+          }
+         
+         if (btn2.held()) WorkMode=0;
+         draw_display();
+       break;
+ 
  }
+
 }
 
 
