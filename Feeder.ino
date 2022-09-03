@@ -164,9 +164,10 @@ void loop() {
                           if (WiFi.status() != WL_CONNECTED) {
                             WiFi.reconnect();
                             SSDP_init();
-                            MQTT_init();
+                            
                           }
                            }
+                           if (!client.connected()) MQTT_init();
                            }
 
    if (feedCheck.isReady()){  //сработал будильник. Покормим котика
