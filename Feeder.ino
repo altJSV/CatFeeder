@@ -140,7 +140,7 @@ void setup() {
 refscr.setInterval(1000); //Интервал обновления экрана дисплея 1 секунда
 wificheck.setInterval(60000);// Интервал между проверками соединения с wifi 1 минута
 rtcsync.setInterval(3600000); //синхронизация  RTC c NTP каждый час
-feedCheck.setInterval(31000); //проверка таймеров кормления 1 раз в 31 секунду
+feedCheck.setInterval(500); //проверка таймеров кормления 1 раз в 31 секунду
 if (scr_off_ms>0) reduceBright.setInterval(scr_off_ms); //снижение яркости при простое;
 for (byte i = 0; i < 4; i++) pinMode(drvPins[i], OUTPUT);   // инициализация пинов драйвера шаговика
 delay(5000);
@@ -170,11 +170,16 @@ void loop() {
                            }
 
    if (feedCheck.isReady()){  //сработал будильник. Покормим котика
+    static byte prevMin = 0;
     rtc.gettime();
+    if (prevMin != rtc.minutes) {
+      prevMin = rtc.minutes;
         for (byte i = 0; i < 4; i++)    // for the whole schedule
-        if (feedTime[i][0] == rtc.Hours && feedTime[i][1] == rtc.minutes)    // время кормления
+        if (feedTime[i][0] == rtc.Hours && feedTime[i][1] == rtc.minutes ) {   // время кормления
           feed();
+        }
     }
+   }
 
 
   if (scr_off_ms>0){
