@@ -176,7 +176,7 @@ void loop() {
     if (prevMin != rtc.minutes) {
       prevMin = rtc.minutes;
         for (byte i = 0; i < 4; i++)    // for the whole schedule
-        if (feedTime[i][0] == rtc.Hours && feedTime[i][1] == rtc.minutes ) {   // время кормления
+        if (feedTime[i][0] == rtc.Hours && feedTime[i][1] == rtc.minutes && feedTime[i][2] == 1 ) {   // время кормления
           feed();
         }
     }
