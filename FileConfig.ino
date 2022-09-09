@@ -11,9 +11,9 @@ bool loadConfig() {
     configFile.close();
     return false;
   }
-  // Проверяем размер файла, будем использовать файл размером меньше 1024 байта
+  // Проверяем размер файла, будем использовать файл размером меньше 2048 байта
   size_t size = configFile.size();
-  if (size > 1024) {
+  if (size > 2048) {
     Serial.println("Config file size is too large");
     configFile.close();
     return false;
@@ -37,12 +37,15 @@ bool loadConfig() {
     feedAmount = root["feedAmount"];
     temp_time_scr = root["time_scr"];
     scr_off_ms=temp_time_scr*1000;
-    last_feed = root["LastFeed"].as<String>();
+    //last_feed = root["LastFeed"].as<String>();
     for (byte j=0; j<4; j++){
     feedTime[j][0]=root["ah"+String(j)];
      feedTime[j][1]=root["am"+String(j)];
       feedTime[j][2]=root["ac"+String(j)];
   }
+    FEED_SPEED = root["steps_delay"];
+    STEPS_FRW = root["steps_forward"];
+    STEPS_BKW = root["steps_backward"];
     return true;
 }
 
@@ -63,12 +66,15 @@ bool saveConfig() {
   json["feedAmount"] = feedAmount;
   temp_time_scr=scr_off_ms/1000;
   json["time_scr"] = temp_time_scr;
-  json["lastFeed"] = last_feed;
+  //json["lastFeed"] = last_feed;
   for (byte j=0; j<4; j++){
   json["ah" + String(j)] =  feedTime[j][0];
   json["am" + String(j)] =  feedTime[j][1];
   json["ac"+ String(j)] =  feedTime[j][2];
   }
+  json["steps_delay"] = FEED_SPEED;
+  json["steps_forward"] = STEPS_FRW;
+  json["steps_backward"] = STEPS_BKW;
   // Помещаем созданный json в глобальную переменную json.printTo(jsonConfig);
   json.printTo(jsonConfig);
   // Открываем файл для записи

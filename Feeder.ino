@@ -13,10 +13,9 @@
   {23, 50, 1},      
 };
 byte a_set=3; //вспомогательная переменная для установки будильников на экране
-#define FEED_SPEED 3000     // задержка между шагами мотора  (мс)
-#define STEPS_FRW 18        // Шагов вперед
-#define STEPS_BKW 10        // Шагов назад
-#define EEPROM_SIZE 24
+int FEED_SPEED=2000;    // задержка между шагами мотора  (мс)
+byte STEPS_FRW=25;        // Шагов вперед
+byte STEPS_BKW=18;
 
 #define SCL 5               // D1
 #define SDA 4               // D2

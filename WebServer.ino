@@ -40,6 +40,7 @@ bool StartAPMode()
 
    void MQTT_init(){  
   //MQQT initialize
+  static uint32_t tmr = 0;
   client.setServer(mqtt_server, mqtt_port);
   client.setCallback(MQTTcallback);
   byte tries=10;
@@ -56,8 +57,7 @@ bool StartAPMode()
     {
       Serial.print("failed with state ");
       Serial.println(client.state());
-      delay(2000);
-    }
+      }
   }
   
    delay(2000);
@@ -96,6 +96,7 @@ void server_init(void) {
   server.on("/feed",handle_feed);
   server.on("/time_scr",handle_time_scr);
   server.on("/status",handle_status_page);
+  server.on("/set_steps",handle_set_steps);
   server.begin();
   Serial.println("HTTP server started");  
 }
@@ -105,6 +106,14 @@ void server_init(void) {
 // Установка SSDP имени по запросу вида http://192.168.0.101/ssdp?ssdp=proba
 void handle_Set_Ssdp() {
   SSDP_Name = server.arg("ssdp"); // Получаем значение ssdp из запроса сохраняем в глобальной переменной
+  saveConfig();                 // Функция сохранения данных во Flash пока пустая
+  server.send(200, "text/plain", "OK"); // отправляем ответ о выполнении
+}
+
+void handle_set_steps() {
+  FEED_SPEED = server.arg("step_d").toInt(); // Получаем значение ssdp из запроса сохраняем в глобальной переменной
+  STEPS_FRW = server.arg("step_f").toInt();       // Шагов вперед
+  STEPS_BKW = server.arg("step_b").toInt();
   saveConfig();                 // Функция сохранения данных во Flash пока пустая
   server.send(200, "text/plain", "OK"); // отправляем ответ о выполнении
 }
@@ -311,6 +320,9 @@ void handle_ConfigJSON() {
   json["ip"] = WiFi.localIP().toString();
   json["time"] = rtc.gettime("H:i:s");
   json["feedAmount"] = feedAmount;
+  json["step_d"] = FEED_SPEED;
+  json["step_f"] = STEPS_FRW;
+  json["step_b"] = STEPS_BKW;
  for (byte j=0; j<4; j++){
  output="";
  if ((feedTime[j][0])<10) output+="0";
